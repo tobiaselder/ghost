@@ -1,4 +1,4 @@
-# ghost.py
+# ghost.py | Tobias Elder | 7/20/15
 import sys, random
 
 # globals
@@ -24,6 +24,25 @@ def addWord(word):
         cur = cur.setdefault(char, dict())
     cur[_END] = _END
 
+def processMove(newchar, player):
+    global g_state
+    print "- Player %d plays [%s]..." % (player, newchar)
+    cur = g_words
+    for char in g_state:
+        cur = cur[char]
+    
+    # is the move building towards a real word?
+    if newchar not in cur.keys():
+        print "Invalid word. Player %d loses!" % player
+        exit()
+
+    g_state = g_state + newchar
+
+    # did the move finish a word?
+    if _END in cur[newchar].keys():
+        print "Completed word: %s. Player %d loses!" % (g_state, player)
+        exit()
+
 def makeMove(cur_word):
     global g_words
     # get to current node in trie
@@ -31,7 +50,6 @@ def makeMove(cur_word):
     for char in cur_word:
         cur = cur[char]
 
-    # now pick the best move available
     winners = getWin(cur)
     if len(winners) > 0:
         return random.choice(winners)
@@ -69,24 +87,6 @@ def getLongest(cur_node):
                 max_letter = k
     return cur_max + 1, k
 
-def processMove(newchar, player):
-    global g_state
-    print "- Player %d plays [%s]..." % (player, newchar)
-    cur = g_words
-    for char in g_state:
-        cur = cur[char]
-    
-    if newchar not in cur.keys():
-        print "Invalid word. Player %d loses!" % player
-        exit()
-
-    g_state = g_state + newchar
-
-    if _END in cur[newchar].keys():
-        print "Completed word: %s. Player %d loses!" % (g_state, player)
-        exit()
-
-
 def main(argv):
     global g_state
     # fill dictionary
@@ -95,30 +95,28 @@ def main(argv):
             addWord(word.rstrip())
 
     move = ""
-    while 1: 
+    while 1: # game will always end eventually, no worries
         # human plays
         human_in = raw_input("Your move: ").lower()
         if len(human_in) > 0:
             move = human_in[0]
-        else:
+        else: # human can enter w/o any input to make computer take a turn
             move = makeMove(g_state)
-
         processMove(move, 1)
+
         # computer plays
         move = makeMove(g_state)
         processMove(move, 2)
-
-
 
 def test(argv):
    addWord("llama")
    addWord("llamas")
    addWord("facebook")
-   addWord("fartcook")
+   addWord("fatecook")
    print g_words
-
 
 # test(sys.argv[1:])
 # exit()
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+    main(sys.argv[1:])
