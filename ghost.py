@@ -27,6 +27,7 @@ def addWord(word):
 def processMove(newchar, player):
     global g_state
     print "- Player %d plays [%s]..." % (player, newchar)
+
     cur = g_words
     for char in g_state:
         cur = cur[char]
@@ -94,7 +95,6 @@ def main(argv):
         for word in wordfile:
             addWord(word.rstrip())
 
-    move = ""
     while 1: # game will always end eventually, no worries
         # human plays
         human_in = raw_input("Your move: ").lower()
