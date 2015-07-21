@@ -26,7 +26,7 @@ def addWord(word):
 
 def processMove(newchar, player):
     global g_state
-    print "- Player %d plays [%s]..." % (player, newchar)
+    print "Player %d plays [%s]..." % (player, newchar)
 
     cur = g_words
     for char in g_state:
@@ -41,7 +41,7 @@ def processMove(newchar, player):
 
     # did the move finish a word?
     if _END in cur[newchar].keys():
-        print "Completed word: %s. Player %d loses!" % (g_state, player)
+        print "Completed word: [%s]. Player %d loses!" % (g_state, player)
         exit()
 
 def makeMove(cur_word):
@@ -97,7 +97,7 @@ def main(argv):
 
     while 1: # game will always end eventually, no worries
         # human plays
-        human_in = raw_input("Your move: ").lower()
+        human_in = raw_input("-> Your move: ").lower()
         if len(human_in) > 0:
             move = human_in[0]
         else: # human can enter w/o any input to make computer take a turn
