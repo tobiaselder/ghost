@@ -1,10 +1,13 @@
 # ghost.py
+import sys, random
 
 # globals
 g_words = dict()
+g_state = ""
 _END = "_END"
 
 def addWord(word):
+    global g_words
     # check if subset is already in the dictionary
     cur = g_words
     for char in word:
@@ -12,7 +15,7 @@ def addWord(word):
             cur = cur[char]
         elif _END in cur:
             return
-        else
+        else:
             break
         
     # add word to dictionary
@@ -21,23 +24,101 @@ def addWord(word):
         cur = cur.setdefault(char, dict())
     cur[_END] = _END
 
+def makeMove(cur_word):
+    global g_words
+    # get to current node in trie
+    cur = g_words
+    for char in cur_word:
+        cur = cur[char]
+
+    # now pick the best move available
+    winners = getWin(cur)
+    if len(winners) > 0:
+        return random.choice(winners)
+    else:
+        length, letter = getLongest(cur)
+        return letter
+
+def getWin(cur_node):
+    winners = []
+    for k in cur_node.keys():
+        good_path = 0 # whether this path is worth taking
+        # is this choice an immediate loss?
+        if _END not in cur_node[k].keys():
+            good_path = 1
+            # does this choice lead to a guaranteed win?
+            for j in cur_node[k].keys():
+                # see if opponent can win from here
+                if _END not in cur_node[k][j].keys() and len(getWin(cur_node[k][j])) == 0:
+                    good_path = 0
+                    break
+            if good_path:
+                winners.append(k)
+
+    return winners
+
+def getLongest(cur_node):
+    cur_max = 0
+    max_letter = ""
+
+    for k in cur_node.keys():
+        if _END not in cur_node[k]:
+            length, letter = getLongest(cur_node[k])
+            if length > cur_max:
+                cur_max = length
+                max_letter = k
+    return cur_max + 1, k
+
+def processMove(newchar, player):
+    global g_state
+    print "- Player %d plays [%s]..." % (player, newchar)
+    cur = g_words
+    for char in g_state:
+        cur = cur[char]
+    
+    if newchar not in cur.keys():
+        print "Invalid word. Player %d loses!" % player
+        exit()
+
+    g_state = g_state + newchar
+
+    if _END in cur[newchar].keys():
+        print "Completed word: %s. Player %d loses!" % (g_state, player)
+        exit()
+
+
 def main(argv):
+    global g_state
     # fill dictionary
     with open("./words.txt") as wordfile:
         for word in wordfile:
-            addWord(word)
+            addWord(word.rstrip())
 
-    if len(argv) > 0 and argv[0] == "-c":
-        # solo mode random
-    elif len(argv) > 1 and argv[0] == "-l":
-        firstletter = argv[1][0]
-        # solo mode with letter decided
-    else:
-        # normal human vs computer
+    move = ""
+    while 1: 
+        # human plays
+        human_in = raw_input("Your move: ").lower()
+        if len(human_in) > 0:
+            move = human_in[0]
+        else:
+            move = makeMove(g_state)
+
+        processMove(move, 1)
+        # computer plays
+        move = makeMove(g_state)
+        processMove(move, 2)
 
 
 
+def test(argv):
+   addWord("llama")
+   addWord("llamas")
+   addWord("facebook")
+   addWord("fartcook")
+   print g_words
 
 
-if __name__ == "__main__":
-    main(sys.argv[1:])
+# test(sys.argv[1:])
+# exit()
+
+main(sys.argv[1:])
