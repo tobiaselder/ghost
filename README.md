@@ -1,2 +1,3 @@
 # ghost
-In which I try to solve the "Ghost" game
+In which I solve the "Ghost" game
+https://en.wikipedia.org/wiki/Ghost_(game)
